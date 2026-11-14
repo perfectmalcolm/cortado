@@ -1,0 +1,126 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny everything not explicitly matched
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidPalateProfile(profile) {
+      return profile is map
+        && profile.keys().hasAll(['sweetness', 'body', 'acidity', 'roastDepth'])
+        && profile.keys().hasOnly(['sweetness', 'body', 'acidity', 'roastDepth'])
+        && profile.sweetness is number && profile.sweetness >= 1 && profile.sweetness <= 10
+        && profile.body is number && profile.body >= 1 && profile.body <= 10
+        && profile.acidity is number && profile.acidity >= 1 && profile.acidity <= 10
+        && profile.roastDepth is number && profile.roastDepth >= 1 && profile.roastDepth <= 10;
+    }
+
+    function isValidRecipe(data) {
+      return data.keys().hasAll([
+        'userId', 'drinkName', 'tagline', 'baristaNote', 'beanOrigin',
+        'roastProfile', 'milkPairing', 'brewMethod', 'vesselStyle', 'cravingSummary',
+        'doseGrams', 'waterOrYieldMl', 'milkMl', 'waterTempC', 'grindSetting',
+        'totalBrewMinutesLabel', 'visualPromptSpec', 'tastingNotes',
+        'palateProfile', 'brewSteps', 'shoppingList', 'isFavorite',
+        'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'userId', 'drinkName', 'tagline', 'baristaNote', 'beanOrigin',
+        'roastProfile', 'milkPairing', 'brewMethod', 'vesselStyle', 'cravingSummary',
+        'doseGrams', 'waterOrYieldMl', 'milkMl', 'waterTempC', 'grindSetting',
+        'totalBrewMinutesLabel', 'visualPromptSpec', 'tastingNotes',
+        'palateProfile', 'brewSteps', 'shoppingList', 'isFavorite',
+        'createdAt', 'updatedAt'
+      ])
+      && data.userId is string && isValidId(data.userId) && data.userId == request.auth.uid
+      && data.drinkName is string && data.drinkName.size() >= 1 && data.drinkName.size() <= 120
+      && data.tagline is string && data.tagline.size() <= 180
+      && data.baristaNote is string && data.baristaNote.size() >= 1 && data.baristaNote.size() <= 2000
+      && data.beanOrigin is string && data.beanOrigin.size() <= 240
+      && data.roastProfile is string && data.roastProfile.size() <= 240
+      && data.milkPairing is string && data.milkPairing.size() <= 240
+      && data.brewMethod is string && data.brewMethod.size() <= 120
+      && data.vesselStyle is string && data.vesselStyle.size() <= 120
+      && data.cravingSummary is string && data.cravingSummary.size() <= 500
+      && data.doseGrams is number && data.doseGrams >= 1 && data.doseGrams <= 500
+      && data.waterOrYieldMl is number && data.waterOrYieldMl >= 10 && data.waterOrYieldMl <= 3000
+      && data.milkMl is number && data.milkMl >= 0 && data.milkMl <= 1000
+      && data.waterTempC is number && data.waterTempC >= 1 && data.waterTempC <= 100
+      && data.grindSetting is string && data.grindSetting.size() <= 80
+      && data.totalBrewMinutesLabel is string && data.totalBrewMinutesLabel.size() <= 40
+      && data.visualPromptSpec is string && data.visualPromptSpec.size() <= 600
+      && data.tastingNotes is list && data.tastingNotes.size() >= 1 && data.tastingNotes.size() <= 6 && data.tastingNotes[0] is string
+      && isValidPalateProfile(data.palateProfile)
+      && data.brewSteps is list && data.brewSteps.size() >= 1 && data.brewSteps.size() <= 12 && data.brewSteps[0] is map
+      && data.shoppingList is list && data.shoppingList.size() >= 1 && data.shoppingList.size() <= 20 && data.shoppingList[0] is map
+      && data.isFavorite is bool
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId}/recipes/{recipeId} {
+      allow list: if isSignedIn()
+        && isVerifiedUser()
+        && isValidId(userId)
+        && userId == request.auth.uid
+        && resource.data.userId == request.auth.uid;
+
+      allow get: if isSignedIn()
+        && isVerifiedUser()
+        && isValidId(userId)
+        && isValidId(recipeId)
+        && userId == request.auth.uid
+        && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && isVerifiedUser()
+        && isValidId(userId)
+        && isValidId(recipeId)
+        && userId == request.auth.uid
+        && isValidRecipe(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isSignedIn()
+        && isVerifiedUser()
+        && isValidId(userId)
+        && isValidId(recipeId)
+        && userId == request.auth.uid
+        && isValidRecipe(incoming())
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['isFavorite', 'updatedAt']);
+
+      allow delete: if isSignedIn()
+        && isVerifiedUser()
+        && isValidId(userId)
+        && isValidId(recipeId)
+        && userId == request.auth.uid
+        && existing().userId == request.auth.uid;
+    }
+  }
+}

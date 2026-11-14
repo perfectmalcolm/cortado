@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "CoffeeRecipe": {
+      "title": "CoffeeRecipe",
+      "description": "A personalized specialty coffee recipe crafted by the barista and saved in a user's Recipe Journal.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the recipe owner.",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "maxLength": 128
+        },
+        "drinkName": {
+          "type": "string",
+          "description": "Name of the crafted specialty coffee drink.",
+          "maxLength": 120
+        },
+        "tagline": {
+          "type": "string",
+          "description": "Concise 1-line flavor summary.",
+          "maxLength": 180
+        },
+        "baristaNote": {
+          "type": "string",
+          "description": "Expert barista rationale for the bean, roast, and milk choices.",
+          "maxLength": 2000
+        },
+        "beanOrigin": {
+          "type": "string",
+          "description": "Recommended bean origin, varietal, and processing method.",
+          "maxLength": 240
+        },
+        "roastProfile": {
+          "type": "string",
+          "description": "Roast level and extraction rationale.",
+          "maxLength": 240
+        },
+        "milkPairing": {
+          "type": "string",
+          "description": "Milk or plant-based alternative preparation and steaming note.",
+          "maxLength": 240
+        },
+        "brewMethod": {
+          "type": "string",
+          "description": "Recommended brewing device and technique.",
+          "maxLength": 120
+        },
+        "vesselStyle": {
+          "type": "string",
+          "description": "Ideal cup or glassware for serving.",
+          "maxLength": 120
+        },
+        "cravingSummary": {
+          "type": "string",
+          "description": "User prompt or flavor preferences that produced this recipe.",
+          "maxLength": 500
+        },
+        "doseGrams": {
+          "type": "number",
+          "description": "Coffee dose in grams."
+        },
+        "waterOrYieldMl": {
+          "type": "number",
+          "description": "Brew water or espresso yield in milliliters."
+        },
+        "milkMl": {
+          "type": "number",
+          "description": "Milk or milk alternative volume in milliliters."
+        },
+        "waterTempC": {
+          "type": "number",
+          "description": "Target water temperature in Celsius."
+        },
+        "grindSetting": {
+          "type": "string",
+          "description": "Recommended grind coarseness.",
+          "maxLength": 80
+        },
+        "totalBrewMinutesLabel": {
+          "type": "string",
+          "description": "Human-readable total brew time.",
+          "maxLength": 40
+        },
+        "visualPromptSpec": {
+          "type": "string",
+          "description": "Visual description for rendering the coffee portrait.",
+          "maxLength": 600
+        },
+        "tastingNotes": {
+          "type": "array",
+          "description": "Up to 6 tasting note descriptors."
+        },
+        "palateProfile": {
+          "type": "object",
+          "description": "Numeric 1-10 scores for sweetness, body, acidity, and roastDepth."
+        },
+        "brewSteps": {
+          "type": "array",
+          "description": "Timed step-by-step brewing instructions."
+        },
+        "shoppingList": {
+          "type": "array",
+          "description": "Categorized grocery list of beans, milks, and equipment."
+        },
+        "isFavorite": {
+          "type": "boolean",
+          "description": "Whether the user starred this recipe."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-updated timestamp."
+        }
+      },
+      "required": [
+        "userId",
+        "drinkName",
+        "tagline",
+        "baristaNote",
+        "beanOrigin",
+        "roastProfile",
+        "milkPairing",
+        "brewMethod",
+        "vesselStyle",
+        "cravingSummary",
+        "doseGrams",
+        "waterOrYieldMl",
+        "milkMl",
+        "waterTempC",
+        "grindSetting",
+        "totalBrewMinutesLabel",
+        "visualPromptSpec",
+        "tastingNotes",
+        "palateProfile",
+        "brewSteps",
+        "shoppingList",
+        "isFavorite",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/recipes/{recipeId}": {
+      "schema": {
+        "$ref": "#/entities/CoffeeRecipe"
+      },
+      "description": "Private specialty coffee recipes saved in a user's Recipe Journal."
+    }
+  }
+}

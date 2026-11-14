@@ -1,0 +1,8 @@
+{
+  "name": "Cortado Atelier",
+  "description": "Specialty coffee crafting studio guided by an expert barista using Gemini AI, with an interactive brew timer, grocery shopping list generator, AI coffee portraits, and a Firebase recipe journal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
